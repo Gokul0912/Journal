@@ -47,15 +47,12 @@
             color: #555;
         }
         .delete-btn {
-            background: red;
+            background-color: red;
             color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
             border-radius: 5px;
-        }
-        .delete-btn:hover {
-            background: darkred;
         }
     </style>
 </head>
@@ -72,10 +69,16 @@
         <input type="text" id="asset" required>
 
         <label for="entry">Entry Price:</label>
-        <input type="number" id="entry" required>
+        <input type="number" id="entry" step="0.01" required>
 
         <label for="exit">Exit Price:</label>
-        <input type="number" id="exit" required>
+        <input type="number" id="exit" step="0.01" required>
+
+        <label for="trade_type">Trade Type:</label>
+        <select id="trade_type" required>
+            <option value="Buy">Buy</option>
+            <option value="Sell">Sell</option>
+        </select>
 
         <label for="strategy">Strategy:</label>
         <input type="text" id="strategy">
@@ -91,6 +94,8 @@
                 <th>Asset</th>
                 <th>Entry</th>
                 <th>Exit</th>
+                <th>Trade Type</th>
+                <th>Profit/Loss</th>
                 <th>Strategy</th>
                 <th>AI Insight</th>
                 <th>Action</th>
@@ -101,7 +106,7 @@
 </div>
 
 <script>
-    const API_BASE_URL = "https://trading-journal1.onrender.com"; // ✅ Backend URL
+    const API_BASE_URL = "https://trading-journal1.onrender.com"; // Update with Render backend URL
 
     document.getElementById("tradeForm").addEventListener("submit", async function(event) {
         event.preventDefault();
@@ -111,6 +116,7 @@
             asset: document.getElementById("asset").value,
             entry_price: parseFloat(document.getElementById("entry").value),
             exit_price: parseFloat(document.getElementById("exit").value),
+            trade_type: document.getElementById("trade_type").value,
             strategy: document.getElementById("strategy").value || "Not Provided"
         };
 
@@ -121,7 +127,7 @@
         });
 
         const result = await response.json();
-        alert("Trade added! AI Insight: " + result.ai_insight);
+        alert("Trade added! Profit/Loss: " + result.profit_loss);
         fetchTrades();
     });
 
@@ -138,6 +144,8 @@
                 <td>${trade.asset}</td>
                 <td>${trade.entry_price}</td>
                 <td>${trade.exit_price}</td>
+                <td>${trade.trade_type}</td>
+                <td>${trade.profit_loss}</td>
                 <td>${trade.strategy}</td>
                 <td class="ai-insight">${trade.ai_insight}</td>
                 <td><button class="delete-btn" onclick="deleteTrade(${trade.id})">Delete</button></td>
@@ -146,15 +154,8 @@
         });
     }
 
-    async function deleteTrade(tradeId) {
-        if (!confirm("Are you sure you want to delete this trade?")) return;
-        
-        const response = await fetch(`${API_BASE_URL}/delete_trade/${tradeId}`, {
-            method: "DELETE",
-        });
-
-        const result = await response.json();
-        alert(result.message);
+    async function deleteTrade(id) {
+        await fetch(`${API_BASE_URL}/delete_trade/${id}`, { method: "DELETE" });
         fetchTrades();
     }
 
@@ -163,3 +164,4 @@
 
 </body>
 </html>
+
